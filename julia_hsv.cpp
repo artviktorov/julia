@@ -4,6 +4,8 @@
 #include <cassert>
 #include <tuple>
 #include <cmath>
+#include <vector>
+#include <thread>
 
 constexpr int w = 800;
 constexpr int h = 800;
@@ -11,16 +13,17 @@ constexpr double re_min = -1.2;
 constexpr double im_min = -1.2;
 constexpr double re_max = 1.2;
 constexpr double im_max = 1.2;
-constexpr std::complex<double> c(0.285, 0.01);
-constexpr int iter = 90;
+// constexpr std::complex<double> c(0.285, 0.01);
+constexpr int iter = 128;
+constexpr int frames = 30*12;
 
-std::complex<double> point2c(double x, double y) {
+inline std::complex<double> point2c(double x, double y) {
   double re = x * (re_max - re_min) / w + re_min;
   double im = y * (im_max - im_min) / h + im_min;
   return {re, im};
 }
 
-std::tuple<int, int, int> hsv2rgb(double hue, double saturation, double value) {
+inline std::tuple<int, int, int> hsv2rgb(double hue, double saturation, double value) {
   double c = value * saturation;
   double h2 = hue / 60.f;
   double x = c * (1 - fabs(fmod(h2, 2) - 1));
@@ -43,31 +46,43 @@ std::tuple<int, int, int> hsv2rgb(double hue, double saturation, double value) {
           static_cast<int>((b + m) * 255)};
 }
 
+void gen_frames(int a, int b) {
+
+}
+
 int main() {
-  std::ofstream img("img.ppm");
-  assert(img.is_open() && "Could not open image file.");
-  img << "P3\n" << w << " " << h << "\n255\n";
+  for (int frame = 0; frame < frames; ++frame) {
+    double angle = 2.f * M_PI * frame / frames;
+    std::complex<double> c(std::cos(angle) * 0.8, std::sin(angle) * 0.8);
 
-  for (int y = 0; y < h; ++y) {
-    for (int x = 0; x < w; ++x) {
-      auto z = point2c(x, y);
-      int i = 0;
-      for (; i < iter; ++i) {
-        if (abs(z) >= 2.f) break;
-        z = z * z + c;
-      }
+    std::ostringstream framename;
+    framename << "./frames/frame_" << std::setfill('0') << std::setw(4) << frame << ".ppm";
+    std::ofstream img(framename.str());
+    assert(img.is_open() && "Error: could not open image file.");
+    img << "P3\n" << w << " " << h << "\n255\n";
+
+    for (int y = 0; y < h; ++y) {
+      for (int x = 0; x < w; ++x) {
+        auto z = point2c(x, y);
+        int i = 0;
+        for (; i < iter; ++i) {
+          if (abs(z) >= 2.f) break;
+          z = z * z + c;
+        }
       
-      double hue = i * 360.f / iter;
-      double saturation = 1.f;
-      double value = i < iter ? 1.f : 0.f;
+        double hue = i * 360.f / iter;
+        double saturation = 1.f;
+        double value = i < iter ? 1.f : 0.f;
 
-      auto [r, g, b] = hsv2rgb(hue, saturation, value);
-      img << r << " " << g << " " << b << " ";
+        auto [r, g, b] = hsv2rgb(hue, saturation, value);
+        img << r << " " << g << " " << b << " ";
+      }
+      img << "\n";
     }
-    img << "\n";
-  }
 
-  img.close();
+    img.close(); 
+    std::cout << "frame " << framename.str() << " saved\n";
+  }
 
   return 0;
 }

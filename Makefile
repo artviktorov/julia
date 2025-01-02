@@ -1,19 +1,26 @@
 CXX = g++
-CXXFLAGS = -std=c++20 -Wall
+CXXFLAGS = -std=c++20 -O2
 
-TARGET = build
+TARGET = julia_hsv
 SRC = julia_hsv.cpp
-OUTPUT_IMG = img.ppm
+FRAMES = ./frames/frame_*.ppm
+VIDEO = fractal_julia.mp4
 
 all: $(TARGET)
 
 $(TARGET): $(SRC)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC)
 
-run: $(TARGET)
-	./$(TARGET) && open $(OUTPUT_IMG)
+frames: $(TARGET)
+	./$(TARGET)
+
+video: frames
+	ffmpeg -framerate 30 -i ./frames/frame_%04d.ppm -c:v libx264 -pix_fmt yuv420p $(VIDEO)
+
+gif:
+	ffmpeg -i $(VIDEO) -vf "fps=15,scale=800:-1:flags=lanczos" -c:v pam -f image2pipe - | convert -delay 6 -loop 0 - fractal_julia.gif
 
 clean:
-	rm -f $(TARGET) $(OUTPUT_IMG)
+	rm -f $(TARGET) $(FRAMES) $(VIDEO)
 
-rebuild: clean all
+.PHONY: all frames video clean

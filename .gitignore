@@ -31,4 +31,6 @@
 *.out
 *.app
 
-build
+julia_hsv
+frames
+*.mp4

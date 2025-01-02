@@ -1,4 +1,8 @@
-# julia
+# Julia fractal
+```
+brew install ffmpeg imagemagick
+make video
+```
 ## PPM format
 ```
 P3                                  -- text RGB image
@@ -8,5 +12,5 @@ P3                                  -- text RGB image
 ...        ...      ...
 255 255 0  ...      255 255 255
 ```
-## Julia fractal
-![Julia fractal](julia.png)
+## GIF example
+![GIF example](fractal_julia.gif)
