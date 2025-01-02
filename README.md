@@ -9,4 +9,4 @@ P3                                  -- text RGB image
 255 255 0  ...      255 255 255
 ```
 ## Julia fractal
-![Julia fractal](img.ppm)
+![Julia fractal](julia.png)
